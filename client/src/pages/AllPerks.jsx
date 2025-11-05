@@ -29,6 +29,22 @@ export default function AllPerks() {
  * useEffect Hook #2: Auto-search on Input Change
 
 */
+  useEffect(() => {
+    // Load all perks once when the component mounts
+    loadAllPerks()
+  }, []) // empty dependency → runs only once on mount
+
+  // ==================== useEffect #2: AUTO SEARCH ON CHANGE ====================
+  useEffect(() => {
+    // Skip first render (since initial data is already loaded)
+    if (!loading) {
+      const delayDebounce = setTimeout(() => {
+        loadAllPerks()
+      }, 500) // debounce delay: 0.5s after user stops typing
+      return () => clearTimeout(delayDebounce)
+    }
+  }, [searchQuery, merchantFilter]) // dependencies: re-run when changed
+
 
   
   useEffect(() => {
@@ -122,73 +138,74 @@ export default function AllPerks() {
 
       {/* Search and Filter Form */}
       <div className="card">
-        <form onSubmit={handleSearch} className="space-y-4">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
-                <span className="material-symbols-outlined text-sm align-middle">search</span>
-                {' '}Search by Name
-              </label>
-              <input
-                type="text"
-                className="input"
-                placeholder="Enter perk name..."
-                
-              />
-              <p className="text-xs text-zinc-500 mt-1">
-                Auto-searches as you type, or press Enter / click Search
-              </p>
-            </div>
-
-            {/* Merchant Filter Dropdown - Controlled Component */}
-            <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-2">
-                <span className="material-symbols-outlined text-sm align-middle">store</span>
-                {' '}Filter by Merchant
-              </label>
-              <select
-                className="input"
-                
-              >
-                <option value="">All Merchants</option>
-                
-                {uniqueMerchants.map(merchant => (
-                  <option key={merchant} value={merchant}>
-                    {merchant}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3 items-center">
-            <button type="submit" className="btn bg-blue-600 text-white border-blue-600 hover:bg-blue-700">
-              <span className="material-symbols-outlined text-sm align-middle">search</span>
-              {' '}Search Now
-            </button>
-            <button 
-              type="button" 
-              onClick={handleReset}
-              className="btn"
-            >
-              <span className="material-symbols-outlined text-sm align-middle">refresh</span>
-              {' '}Reset Filters
-            </button>
-            
-            {/* Loading indicator */}
-            {loading && (
-              <div className="flex items-center gap-2 text-sm text-zinc-600">
-                <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
-                Searching...
-              </div>
-            )}
-          </div>
-        </form>
+  <form onSubmit={handleSearch} className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      
+      {/* Search Input */}
+      <div>
+        <label className="block text-sm font-medium text-zinc-700 mb-2">
+          <span className="material-symbols-outlined text-sm align-middle">search</span>
+          {' '}Search by Name
+        </label>
+        <input
+          type="text"
+          className="input"
+          placeholder="Enter perk name..."
+          value={searchQuery}  // Bind the input to the searchQuery state
+          onChange={(e) => setSearchQuery(e.target.value)}  // Update the searchQuery state on input change
+        />
+        <p className="text-xs text-zinc-500 mt-1">
+          Auto-searches as you type, or press Enter / click Search
+        </p>
       </div>
+
+      {/* Merchant Filter Dropdown */}
+      <div>
+        <label className="block text-sm font-medium text-zinc-700 mb-2">
+          <span className="material-symbols-outlined text-sm align-middle">store</span>
+          {' '}Filter by Merchant
+        </label>
+        <select
+          className="input"
+          value={merchantFilter}  // Bind the dropdown to the merchantFilter state
+          onChange={(e) => setMerchantFilter(e.target.value)}  // Update the merchantFilter state on change
+        >
+          <option value="">All Merchants</option>
+          {uniqueMerchants.map(merchant => (
+            <option key={merchant} value={merchant}>
+              {merchant}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+
+    {/* Action Buttons */}
+    <div className="flex gap-3 items-center">
+      <button type="submit" className="btn bg-blue-600 text-white border-blue-600 hover:bg-blue-700">
+        <span className="material-symbols-outlined text-sm align-middle">search</span>
+        {' '}Search Now
+      </button>
+      <button 
+        type="button" 
+        onClick={handleReset}
+        className="btn"
+      >
+        <span className="material-symbols-outlined text-sm align-middle">refresh</span>
+        {' '}Reset Filters
+      </button>
+      
+      {/* Loading indicator */}
+      {loading && (
+        <div className="flex items-center gap-2 text-sm text-zinc-600">
+          <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+          Searching...
+        </div>
+      )}
+    </div>
+  </form>
+</div>
+
 
       {/* Error Message - Inline, doesn't replace the UI */}
       {error && (
